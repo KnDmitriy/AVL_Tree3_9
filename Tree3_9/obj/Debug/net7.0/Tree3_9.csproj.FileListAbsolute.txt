@@ -1,0 +1,15 @@
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/bin/Debug/net7.0/Tree3_9
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/bin/Debug/net7.0/Tree3_9.deps.json
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/bin/Debug/net7.0/Tree3_9.runtimeconfig.json
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/bin/Debug/net7.0/Tree3_9.dll
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/bin/Debug/net7.0/Tree3_9.pdb
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/obj/Debug/net7.0/Tree3_9.csproj.AssemblyReference.cache
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/obj/Debug/net7.0/Tree3_9.GeneratedMSBuildEditorConfig.editorconfig
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/obj/Debug/net7.0/Tree3_9.AssemblyInfoInputs.cache
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/obj/Debug/net7.0/Tree3_9.AssemblyInfo.cs
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/obj/Debug/net7.0/Tree3_9.csproj.CoreCompileInputs.cache
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/obj/Debug/net7.0/Tree3_9.dll
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/obj/Debug/net7.0/refint/Tree3_9.dll
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/obj/Debug/net7.0/Tree3_9.pdb
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/obj/Debug/net7.0/Tree3_9.genruntimeconfig.cache
+/Users/DmitryKonorov/Projects/Tree3_9/Tree3_9/obj/Debug/net7.0/ref/Tree3_9.dll
