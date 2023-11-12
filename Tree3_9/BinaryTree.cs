@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -20,7 +20,8 @@ namespace tree_3_9
             public TaskData(int toAdd, ref Node root)
             {
                 answer = true;
-                this.root = root;
+                Node.Copy(ref this.root, ref root);
+                //this.root = root;
                 this.toAdd = toAdd;
                 targetNode = root;
                 minValue = int.MinValue;
@@ -72,14 +73,36 @@ namespace tree_3_9
                 get {
                     return (this != null) ? height : 0;
                 }
-            }       
+            }
+            //Копирование всех узлов из дерева fromThisTree в дерево toThisTree
+            //с помощью модификации прямого обхода дерева (Preorder).
+            public static void Copy(ref Node fromThisTree, ref Node toThisTree)
+            {
+                if (fromThisTree != null)
+                {
+                    //Если в дереве toThisTree нет узла fromThisTree.inf, то вставим этот узел
+                    Node res;
+                    Search(toThisTree, fromThisTree.inf, out res);
+                    if (res == null)
+                    {
+                        //добавление узла fromThisTree.inf в toThisTree
+                        Add(ref toThisTree, fromThisTree.inf);
+                        
+                    }
+                    Copy(ref fromThisTree.left, ref toThisTree.left);
+                    Copy(ref fromThisTree.right, ref toThisTree.right);
+
+
+
+                }
+            }
             private int BalanceFactor
             {
                 get
                 {
-                    int rightCounter = right != null ? right.counter : 0;
-                    int leftCounter = left != null ? left.counter : 0;
-                    return leftCounter - rightCounter;
+                    int rh = right != null ? right.height : 0;
+                    int lh = left != null ? left.height : 0;
+                    return lh - rh;
                 }
             }
             
@@ -88,9 +111,12 @@ namespace tree_3_9
 
             public void NewHeight()
             {
-                int rh = (right != null) ? right.Height : 0;
-                int lh = (left != null) ? left.Height : 0;
-                height = ((rh > lh) ? rh : lh) + 1;
+                if (this != null)
+                {
+                    int rh = (right != null) ? right.Height : 0;
+                    int lh = (left != null) ? left.Height : 0;
+                    height = ((rh > lh) ? rh : lh) + 1;
+                }
             }
             public static void RotationRight(ref Node t)
             {
@@ -184,7 +210,7 @@ namespace tree_3_9
                     return;
                 }
                 level++;
-                currentNode.counter++;
+                RecountHeight(currentNode);
                 if (currentNode.BalanceFactor < 0)
                 {
                     taskData.maxValue = Math.Min(taskData.maxValue, (int)currentNode.inf);
@@ -205,14 +231,14 @@ namespace tree_3_9
                 {
                     taskData.maxValue = Math.Min(taskData.maxValue, (int)currentNode.inf);
                     taskData.pathVertices.Enqueue((int)currentNode.inf);
-                    currentNode.counter++;
+                    currentNode.height++;
                     TaskSearch(ref currentNode.left, taskData);
                 }
                 if (((IComparable)currentNode.inf).CompareTo(taskData.targetNode.inf) < 0)
                 {
                     taskData.minValue = Math.Max(taskData.minValue, (int)currentNode.inf);
                     taskData.pathVertices.Enqueue((int)currentNode.inf);
-                    currentNode.counter++;
+                    currentNode.height++;
                     TaskSearch(ref currentNode.right, taskData);
                 }
             }
@@ -233,7 +259,7 @@ namespace tree_3_9
                 {
                     InOrderTraversal(currentNode.left);
                     Console.WriteLine(currentNode.inf + "\tlevel: " + currentNode.level +
-                        "\tcounter: " + currentNode.height);
+                        "\theight: " + currentNode.height);
                     InOrderTraversal(currentNode.right);
                 }
             }
@@ -330,7 +356,7 @@ namespace tree_3_9
                     toDelete.inf = replacement.inf;
                     replacement = replacement.right;
                     RecountLevel(replacement);
-                    replacement.NewHeight();
+                    RecountHeight(replacement);
                 }
                 else
                 {
@@ -363,9 +389,13 @@ namespace tree_3_9
             //Пересчёт высоты
             private static void RecountHeight(Node target)
             {
-                int rightHeight = target.right != null ? target.right.height : 0;
-                int leftHeight = target.left != null ? target.left.height : 0;
-                target.height = Math.Max(rightHeight, leftHeight) + 1;
+                if (target != null)
+                {
+                    int rightHeight = target.right != null ? target.right.height : 0;
+                    int leftHeight = target.left != null ? target.left.height : 0;
+                    target.height = Math.Max(rightHeight, leftHeight) + 1;
+                }
+                
             }
 
             //task 3_10
