@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -11,16 +11,17 @@ namespace tree_3_9
             public Node root;
             public Node targetNode;
             public int toAdd;
-            public int minValue;
-            public int maxValue;
+            public long minValue;
+            public long maxValue;
             public bool answer;
-            public Stack<int> addedValue = new Stack<int>();
-            public Queue<int> pathVertices = new Queue<int>();
+            public Stack<long> addedValue = new Stack<long>();
+            public Queue<long> pathVertices = new Queue<long>();
             public List<string> data = new List<string>();
             public TaskData(int toAdd, ref Node root)
             {
                 answer = true;
-                this.root = root;
+                Node.Copy(ref root, ref this.root);
+                //this.root = root;
                 this.toAdd = toAdd;
                 targetNode = root;
                 minValue = int.MinValue;
@@ -41,7 +42,7 @@ namespace tree_3_9
                     s += pathVertices.Dequeue() + "->";
                 }
                 s += pathVertices.Dequeue();
-                s += " with value in range of [" + minValue + "; " + maxValue + "]. " + toAdd + " left.\n";
+                s += " with value in range of [" + minValue + "; " + maxValue + "]. " + (toAdd + 1) + " left.\n";
                 data.Add(s);
             }
         }
@@ -72,14 +73,36 @@ namespace tree_3_9
                 get {
                     return (this != null) ? height : 0;
                 }
-            }       
+            }
+            //Копирование всех узлов из дерева fromThisTree в дерево toThisTree
+            //с помощью модификации прямого обхода дерева (Preorder).
+            public static void Copy(ref Node fromThisTree, ref Node toThisTree)
+            {
+                if (fromThisTree != null)
+                {
+                    //Если в дереве toThisTree нет узла fromThisTree.inf, то вставим этот узел
+                    Node res;
+                    Search(toThisTree, fromThisTree.inf, out res);
+                    if (res == null)
+                    {
+                        //добавление узла fromThisTree.inf в toThisTree
+                        Add(ref toThisTree, fromThisTree.inf);
+                        
+                    }
+                    Copy(ref fromThisTree.left, ref toThisTree.left);
+                    Copy(ref fromThisTree.right, ref toThisTree.right);
+
+
+
+                }
+            }
             private int BalanceFactor
             {
                 get
                 {
-                    int rightCounter = right != null ? right.counter : 0;
-                    int leftCounter = left != null ? left.counter : 0;
-                    return leftCounter - rightCounter;
+                    int rh = right != null ? right.height : 0;
+                    int lh = left != null ? left.height : 0;
+                    return lh - rh;
                 }
             }
             
@@ -88,9 +111,12 @@ namespace tree_3_9
 
             public void NewHeight()
             {
-                int rh = (right != null) ? right.Height : 0;
-                int lh = (left != null) ? left.Height : 0;
-                height = ((rh > lh) ? rh : lh) + 1;
+                if (this != null)
+                {
+                    int rh = (right != null) ? right.Height : 0;
+                    int lh = (left != null) ? left.Height : 0;
+                    height = ((rh > lh) ? rh : lh) + 1;
+                }
             }
             public static void RotationRight(ref Node t)
             {
@@ -173,46 +199,50 @@ namespace tree_3_9
                 RecountHeight(currentNode);
             }
 
-            public static void TaskAdd(ref Node currentNode, in TaskData taskData, ref uint level)
+            public static void TaskAdd(ref Node taskTargetNode, TaskData taskData, ref uint level)
             {
-                if (currentNode == null)
+               
+                if (taskTargetNode == null)
                 {
-                    currentNode = new Node((taskData.minValue + taskData.maxValue / 2) / 2, level);
-                    taskData.targetNode = currentNode;
-                    taskData.addedValue.Push((int)currentNode.inf);
+                    if (taskData.maxValue != int.MaxValue)
+                        taskTargetNode = new Node((taskData.minValue + taskData.maxValue) / 2, level);
+                    else
+                        taskTargetNode = new Node((taskData.minValue + (long)taskData.maxValue) / 2, level);
+                    taskData.targetNode = taskTargetNode;
+                    taskData.addedValue.Push((long)taskTargetNode.inf);
                     taskData.toAdd--;
                     return;
                 }
                 level++;
-                currentNode.counter++;
-                if (currentNode.BalanceFactor < 0)
+                RecountHeight(taskTargetNode);
+                if (taskTargetNode.BalanceFactor < 0)
                 {
-                    taskData.maxValue = Math.Min(taskData.maxValue, (int)currentNode.inf);
-                    taskData.pathVertices.Enqueue((int)currentNode.inf);
-                    TaskAdd(ref currentNode.left, taskData, ref level);
+                    taskData.maxValue = Math.Min(taskData.maxValue, (int)taskTargetNode.inf);
+                    taskData.pathVertices.Enqueue((int)taskTargetNode.inf);
+                    TaskAdd(ref taskTargetNode.left, taskData, ref level);
                 }
                 else
                 {
-                    taskData.minValue = Math.Max(taskData.minValue, (int)currentNode.inf);
-                    taskData.pathVertices.Enqueue((int)currentNode.inf);
-                    TaskAdd(ref currentNode.right, taskData, ref level);
+                    taskData.minValue = Math.Max(taskData.minValue, (int)taskTargetNode.inf);
+                    taskData.pathVertices.Enqueue((int)taskTargetNode.inf);
+                    TaskAdd(ref taskTargetNode.right, taskData, ref level);
                 }
             }
 
-            static void TaskSearch(ref Node currentNode, in TaskData taskData)
+            static void TaskSearch(ref Node currentNode, TaskData taskData)
             {
                 if (((IComparable)currentNode.inf).CompareTo(taskData.targetNode.inf) > 0)
                 {
                     taskData.maxValue = Math.Min(taskData.maxValue, (int)currentNode.inf);
                     taskData.pathVertices.Enqueue((int)currentNode.inf);
-                    currentNode.counter++;
+                    currentNode.height++;
                     TaskSearch(ref currentNode.left, taskData);
                 }
                 if (((IComparable)currentNode.inf).CompareTo(taskData.targetNode.inf) < 0)
                 {
                     taskData.minValue = Math.Max(taskData.minValue, (int)currentNode.inf);
                     taskData.pathVertices.Enqueue((int)currentNode.inf);
-                    currentNode.counter++;
+                    currentNode.height++;
                     TaskSearch(ref currentNode.right, taskData);
                 }
             }
@@ -233,7 +263,7 @@ namespace tree_3_9
                 {
                     InOrderTraversal(currentNode.left);
                     Console.WriteLine(currentNode.inf + "\tlevel: " + currentNode.level +
-                        "\tcounter: " + currentNode.height);
+                        "\theight: " + currentNode.height);
                     InOrderTraversal(currentNode.right);
                 }
             }
@@ -330,7 +360,7 @@ namespace tree_3_9
                     toDelete.inf = replacement.inf;
                     replacement = replacement.right;
                     RecountLevel(replacement);
-                    replacement.NewHeight();
+                    RecountHeight(replacement);
                 }
                 else
                 {
@@ -363,25 +393,42 @@ namespace tree_3_9
             //Пересчёт высоты
             private static void RecountHeight(Node target)
             {
-                int rightHeight = target.right != null ? target.right.height : 0;
-                int leftHeight = target.left != null ? target.left.height : 0;
-                target.height = Math.Max(rightHeight, leftHeight) + 1;
+                if (target != null)
+                {
+                    int rightHeight = target.right != null ? target.right.height : 0;
+                    int leftHeight = target.left != null ? target.left.height : 0;
+                    target.height = Math.Max(rightHeight, leftHeight) + 1;
+                }
+                
             }
 
             //task 3_10
-            public static void task_3_10(Node currentNode, in TaskData taskData)
+            public static void task_3_9(Node currentNode, TaskData taskData)
             {
                 uint level = 1;
                 FindDisbalance(currentNode, taskData, ref level);
+                //После FindDisbalance уже известно минимальное количество узлов, нужное для устранения дисбаланса
+                //Если n > этого числа, то ответ на поставленный вопрос оложительный.
+                //Остается найти допустимые значения добавляемых узлов.
+
+                //если невозможно сбалансировать дерево с помощью добавления n узлов, 
+                //то функция FindDisbalance выведет сообщение об этом и установит
+                //taskData.answer в false. Изначально taskData.answer == true.
+                
+                if (taskData.answer)
+                { //здесь нужно найти допустимые значения добавляемых узлов.
+
+                }
+
             }
 
             private static void FindDisbalance(Node currentNode, in TaskData taskData, ref uint level)
             {
                 if (currentNode == null)
                 { return; }
-                if (Math.Abs(currentNode.BalanceFactor) > taskData.toAdd || taskData.toAdd < 0)
+                if (Math.Abs(currentNode.BalanceFactor) - 1 > taskData.toAdd || taskData.toAdd < 0)
                 {
-                    TerminateFixing(currentNode, taskData);
+                    TerminateFixing(taskData);
                     return;
                 }
                 if (currentNode.BalanceFactor >= 2 || currentNode.BalanceFactor <= -2)
@@ -395,17 +442,18 @@ namespace tree_3_9
                     FindDisbalance(currentNode.left, taskData, ref level);
                 }
             }
-            private static void FixDisbalance(Node currentNode, in TaskData taskData, ref uint level)
+            private static void FixDisbalance(Node currentNode, TaskData taskData, ref uint level)
             {
-                taskData.targetNode = currentNode;
-                TaskSearch(ref taskData.root, in taskData);
-                TaskAdd(ref taskData.targetNode, in taskData, ref level);
+                Copy(ref currentNode, ref taskData.targetNode);
+                
+                TaskSearch(ref taskData.root, taskData);
+                TaskAdd(ref taskData.targetNode, taskData, ref level);
                 taskData.AddData();
                 taskData.Reset();
                 level = 1;
                 FindDisbalance(taskData.root, taskData, ref level);
             }
-            private static void TerminateFixing(Node currentNode, in TaskData taskData)
+            private static void TerminateFixing(TaskData taskData)
             {
                 taskData.answer = false;
                 foreach (int node in taskData.addedValue)
@@ -479,11 +527,11 @@ namespace tree_3_9
 
 
 
-        //Задание 3_10
-        public void task_3_10(int toAdd)
+        //Задание 3_9
+        public void task_3_9(int toAdd)
         {
             TaskData taskData = new TaskData(toAdd, ref tree);
-            Node.task_3_10(tree, taskData);
+            Node.task_3_9(tree, taskData);
             if (taskData.answer)
             {
                 Console.WriteLine("Balancing is possible adding following nodes:");
